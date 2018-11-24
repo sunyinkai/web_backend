@@ -21,4 +21,4 @@ class User(models.Model):
 class Post(models.Model):
     id = models.IntegerField(primary_key=True)
     body = models.TextField()
-    author_id = models.ForeignKey('User', on_delete=models.CASCADE)  # 默认关联到User的主键
+    author = models.ForeignKey('User', on_delete=models.CASCADE)  # 默认关联到User的主键
