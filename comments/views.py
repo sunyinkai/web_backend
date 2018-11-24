@@ -65,8 +65,8 @@ def edit(request, post_id):
         if request.method == 'POST':
             form = PostForm(request.POST)
             if form.is_valid():
-                body = form.cleaned_data['body']
-                post.body = body
+                post.body = form.cleaned_data['body']
+                post.save()
         return render(request, 'edit_post.html', {'post': post})
     else:  # 文章不属于当前用户,显示没有权限修改
         return HttpResponse('Sorry,You have no the access to modify it!')
