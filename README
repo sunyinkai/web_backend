@@ -79,3 +79,16 @@ c.list_set.all() #通过foreignkey在子表list中查找女生,这里有详解: 
 django重定向:
 HttpResponseRedirect
 https://blog.csdn.net/orangleliu/article/details/38347863
+
+
+--------
+undo
+
+django 静态文件
+django 数据库多对多
+如果是当前用户的发表的动态,用户可以修改,删除
+评论子系统的实现
+
+
+
+
