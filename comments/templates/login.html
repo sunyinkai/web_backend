@@ -5,7 +5,7 @@
 </head>
 <body>
     {% block mainbody %}
-    <!--跳转到相应的视图函数-->
+    <!--把表单发送到相应的视图函数-->
     <form action="/comments/login/" method="post">
         {% csrf_token %}
         username:<input type="text" name="username"/> <br/>
