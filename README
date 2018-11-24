@@ -1,0 +1,81 @@
+first: 编写视图函数
+在当前应用中的urlconfig:编写路由urls.py
+在根urlconfig:指定我们创建的应用的polls.url模块
+通过运行 makemigrations 命令，Django 会检测你对模型文件的修改（在这种情况下，你已经取得了新的），并且把修改的部分储存为一次 迁移
+views function:
+def index(request):
+    context=''
+    return render(request,'polls/index.html',context)
+
+
+
+数据库的基本操作:
+>>> from polls.models import Choice, Question  # Import the model classes we just wrote.
+
+# No questions are in the system yet.
+>>> Question.objects.all()
+>>> from django.utils import timezone
+>>> q = Question(question_text="What's new?", pub_date=timezone.now())
+# Save the object into the database. You have to call save() explicitly.
+>>> q.save()
+# Now it has an ID.
+>>> q.id
+1
+>>> q.question_text
+"What's new?"
+>>> q.pub_date
+datetime.datetime(2012, 2, 26, 13, 0, 0, 775217, tzinfo=<UTC>)
+# Change values by changing the attributes, then calling save().
+>>> q.question_text = "What's up?"
+>>> q.save()
+# objects.all() displays all the questions in the database.
+>>> Question.objects.all()
+<QuerySet [<Question: Question object (1)>]>
+数据库的操作:增查删改,https://www.w3cschool.cn/django/django-model.html
+
+新建数据库结构:
+python manage.py makemigrations
+python manage.py migrate
+
+外键的使用:
+from django.db import models
+
+class Coding(models.Model):
+    text = models.CharField(max_length=10)
+    gender = models.IntegerField(unique=True,primary_key = True)
+    # 设置性别 gender 为 primary key
+class List(models.Model):
+    Number = models.IntegerField(unique=True,blank=False, null=False)
+    Gender = models.ForeignKey('Coding',on_delete=models.CASCADE)
+    # 关联Coding表格
+usage:
+$ from app002.models import Coding, List        # 引入模型
+$ r=Coding(text='男',gender=1)
+$ r.save()
+$ r1=Coding(text='女',gender=2)
+$ r1.save()
+字表list:
+$ a=List(id=None,Number=1234,Gender=r)  # 上面定义了r=……男……
+$ a.save()
+正向查询:
+a.Gender     ---->其实它的对象是一个Coding
+反向查询:
+c=Coding.objects.get(text='男')
+c.list_set.all() #通过foreignkey在子表list中查找女生,这里有详解:   https://paste.ubuntu.com/p/sJvpRPSdg2/
+
+
+
+往模板里传参数:
+    List=['A','B']
+    Dict={'A':'a','B':'b'}
+    context={
+        # 'List':json.dumps(List),
+        # 'Dict':json.dumps(Dict)
+        'List':List,
+        'Dict':Dict,
+    }
+    return render(request,'polls/index.html',context)
+
+django重定向:
+HttpResponseRedirect
+https://blog.csdn.net/orangleliu/article/details/38347863

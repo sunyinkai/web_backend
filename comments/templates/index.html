@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+</head>
+<body>
+{% block content %}
+<h2>your cookie</h2>
+<p> {{ form }}</p>
+<p> username:{{request.session.username}}</p>
+<p> id:{{request.session.user_id}}</p>
+<p>cookie: {{request.COOKIES}}</p>
+{% if request.session.is_login %}
+    <h1>hello,what's your mind?</h1>
+    {% block mainbody %}
+    <!--将表单发送到指定页面-->
+    <form action="/comments/index/" method="post">
+        {% csrf_token %}
+        username:<input type="text" name="username"/> <br/>
+        <!--passowrd:<input type="password" name="password"/> <br/>-->
+        <input type="submit" value="Submit"/>
+    </form>
+
+    {{ username }}  <br/>
+    {{ password }}  <br/>
+    {% endblock %}
+{% else %}
+    <h1>you are not login</h1>
+{% endif %}
+{% endblock %}
+</body>
+</html>
