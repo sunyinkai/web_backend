@@ -1,0 +1,42 @@
+class Host(models.Model):
+    hostname = models.CharField(max_length=32)
+    port = models.IntegerField()
+
+class HostAdmin(models.Model):
+    username = models.CharField(max_length=32)
+    email = models.CharField(max_length=32)
+    host = models.ManyToManyField(Host)
+
+
+Host.objects.create(hostname='host1.test.com',port=80)
+Host.objects.create(hostname='host2.test.com',port=80)
+Host.objects.create(hostname='host3.test.com',port=80)
+Host.objects.create(hostname='host4.test.com',port=80)
+
+HostAdmin.objects.create(username='alex',email='alex@qq.com')
+HostAdmin.objects.create(username='dali',email='dali@qq.com')
+HostAdmin.objects.create(username='haojie',email='haojie@qq.com')
+HostAdmin.objects.create(username='wusir',email='wusir@qq.com')
+
+admin_obj = HostAdmin.objects.get(username='dali') id=2
+host_list = Host.objects.filter(id__lt=3) id=1,2
+admin_obj.host.add(*host_list)
+主机列表:
+id hostname port          
+1 host1.test.com 80       
+2 host2.test.com 80       
+3 host3.test.com 80       
+4 host4.test.com 80
+
+用户列表:
+id username email
+1 alex alex@qq.com
+2 dali dali@qq.com
+3 haojie haojie@qq.com
+4 wusir wusir@qq.com
+
+第三张表:
+id hostadmin_id host_id
+1	2	1
+2	2	2
+

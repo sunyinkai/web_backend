@@ -30,4 +30,14 @@ class Coding(models.Model):
 class List(models.Model):
     Number=models.IntegerField(unique=True,blank=False,null=False)
     Gender=models.ForeignKey('Coding',on_delete=models.CASCADE) #在默认的情况下，外键储存的是主表的主键（Primary key）
+
+
+class Host(models.Model):
+    hostname = models.CharField(max_length=32)
+    port = models.IntegerField()
+
+class HostAdmin(models.Model):
+    username = models.CharField(max_length=32)
+    email = models.CharField(max_length=32)
+    host = models.ManyToManyField(Host)
     
