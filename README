@@ -81,13 +81,7 @@ HttpResponseRedirect
 https://blog.csdn.net/orangleliu/article/details/38347863
 
 
--------------
-undo
 
-django 静态文件
-django 数据库多对多
-如果是当前用户的发表的动态,用户可以修改,删除
-评论子系统的实现
 
 feature:
 默认情况下，Django会在model名的前面加上你的“应用的名称_”作为数据库表的名称。
@@ -182,3 +176,16 @@ host_obj = Host.objects.filter(id__gt=2)
 ...     print admin_line.hostadmin.username
 
 通过HostRelation表，怎么查询都是正向查询。非常方便，所以一般处理多对多关系的时候建议自己创建关系表
+
+
+-------------
+undo
+
+django 静态文件
+django 数据库多对多
+登录:
+
+动态的发布:
+    如果是当前用户的发表的动态,用户可以修改,删除,
+评论子系统:
+    如果是当前用户的评论,

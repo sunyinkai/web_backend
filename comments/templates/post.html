@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>post:{{post.id}}</title>
+</head>
+<body>
+
+<div>  <!--cookie信息 -->
+    {% block content %}
+    <h2>your cookie</h2>
+    <p> {{ form }}</p>
+    <p> username:{{request.session.username}}</p>
+    <p> id:{{request.session.user_id}}</p>
+    <p>cookie: {{request.COOKIES}}</p>
+</div>
+
+<div> <!--　显示当前post的信息 -->
+        <li>---下边的是当前id的内容----
+            <p>author:{{post.author.username}}</p>
+            <p>content:{{post.body}}</p>
+        </li>
+        <br/>
+</div>
+
+{% endblock %}
+</body>
+</html>

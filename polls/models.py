@@ -2,6 +2,41 @@ from django.db import models
 from django.utils import timezone
 import datetime
 # Create your models here.
+
+class Comment(models.Model):
+    id=models.IntegerField(primary_key=True)
+    body=models.TextField()
+    author=models.ForeignKey('User',on_delete=models.CASCADE)
+    post=models.ForeignKey('Post',on_delete=models.CASCADE)
+class User(models.Model):
+    username = models.CharField(max_length=20)
+    id = models.IntegerField(primary_key=True)
+class Post(models.Model):
+    id = models.IntegerField(primary_key=True)
+    body = models.TextField()
+    author = models.ForeignKey('User', on_delete=models.CASCADE)  # 默认关联到User的主键
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class Question(models.Model):
     question_text=models.CharField(max_length=200)
     pub_date=models.DateTimeField('data published')
@@ -18,9 +53,6 @@ class Choice(models.Model):
 
     def __repr__(self):
         return self.choice_text
-
-
-
 
 class Coding(models.Model):
     text=models.CharField(max_length=10)
