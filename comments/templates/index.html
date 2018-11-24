@@ -5,28 +5,39 @@
     <title>首页</title>
 </head>
 <body>
-{% block content %}
-<h2>your cookie</h2>
-<p> {{ form }}</p>
-<p> username:{{request.session.username}}</p>
-<p> id:{{request.session.user_id}}</p>
-<p>cookie: {{request.COOKIES}}</p>
-{% if request.session.is_login %}
-    <h1>hello,what's your mind?</h1>
-    {% block mainbody %}
-    <!--将表单发送到指定页面-->
-    <form action="/comments/index/" method="post">
-        {% csrf_token %}
-        content:<input type="text" style="width:700px;height:200px;" name="body"/> <br/>
-        <input type="submit" value="Submit"/>
-    </form>
 
-    {{ username }}  <br/>
-    {{ password }}  <br/>
-    {% endblock %}
-{% else %}
-    <h1>you are not login</h1>
-{% endif %}
+<div>  <!--发表动态页面 -->
+    {% block content %}
+    <h2>your cookie</h2>
+    <p> {{ form }}</p>
+    <p> username:{{request.session.username}}</p>
+    <p> id:{{request.session.user_id}}</p>
+    <p>cookie: {{request.COOKIES}}</p>
+    {% if request.session.is_login %}
+        <h1>hello,what's your mind?</h1>
+        {% block mainbody %}
+        <!--这个的作用是: 将表单发送到指定页面-->
+        <form action="/comments/index/" method="post">
+            {% csrf_token %}
+            content:<input type="text" style="width:700px;height:200px;" name="body"/> <br/>
+            <input type="submit" value="Submit"/>
+        </form>
+        {% endblock %}
+    {% else %}
+        <h1>you are not login</h1>
+    {% endif %}
+</div>
+
+<div> <!--　显示动态页面 -->
+    {% for post in posts %}
+        <li>---下边的是新发表的动态----
+            <p>author:{{post.author.username}}</p>
+            <p>content:{{post.body}}</p>
+        </li>
+        <br/>
+    {% endfor %}
+</div>
+
 {% endblock %}
 </body>
 </html>
