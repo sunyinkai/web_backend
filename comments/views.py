@@ -35,7 +35,21 @@ def index(request):  #如果访问localhost:8000/polls/index/
     if is_login: #如果已经登录
         #if forms validate_on_submit,save to db,return redirect(/index/)
         if request.method=='POST':
-            #将表单中的数据提取出来,并且存储到数据库中
+            form=PostForm(request.POST)
+            if form.is_valid():
+                body=form.cleaned_data['body']
+                user_id=request.session.get('user_id')
+                username=request.session.get('username')
+                user=User(username=username,id=user_id)
+                post=Post(body=body,author_id=user)
+                post.save()
+                # 将表单中的数据提取出来,并且存储到数据库中
+
+                print('post information:----------------------')
+                print('now in post')
+                print('the post content is:\n %s'%(body))
+                print('the user_id is: %d'%(user_id))
+                print('end post:------------------------------')
             return render(request, 'index.html', {'form': request.session.get('username')}) #why use request.session.usernam will raise problem
         return render(request,'index.html')
 
