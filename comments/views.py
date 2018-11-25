@@ -77,5 +77,7 @@ def register(request):
 
 
 def logout(request):
-    pass
-    return redirect("/index/")
+    session_keys=list(request.session.keys())
+    for key in session_keys:
+        del request.session[key]
+    return redirect("/comments/login/")

@@ -7,6 +7,7 @@
 <body>
 
 <div>  <!--发表动态页面 -->
+    <a href="/comments/logout/" style="position:relative;float:right">logout</a>
     {% block content %}
     <h2>your cookie</h2>
     <p> {{ form }}</p>
@@ -34,6 +35,11 @@
             <p>author:{{post.author.username}}</p>
             <p>content:{{post.body}}</p>
         </li>
+        <a href="/comments/post/{{post.id}}">permlink</a> <!-- 动态的固定地址 -->
+        &emsp;&emsp;&emsp;
+        {% if post.author.id == request.session.user_id %}
+            <a href="/comments/edit/{{post.id}}">edit</a> <!-- 编辑动态 -->
+        {% endif %}
         <br/>
     {% endfor %}
 </div>
