@@ -23,6 +23,37 @@
         <br/>
 </div>
 
+<div> <!-- 提交评论的表单 -->
+    {% if request.session.is_login %}
+        <h1>hello,what's you want to comment?</h1>
+        {% block mainbody %}
+        <!--这个的作用是: 将表单发送到指定页面,name是form.cleaned_data可以访问的-->
+        <form action="/comments/post/{{post_id}}" method="post">
+            {% csrf_token %}
+            content:<input type="text" style="width:700px;height:200px;" name="body"/> <br/>
+            <input type="submit" value="Submit"/>
+        </form>
+        {% endblock %}
+    {% else %}
+        <h1>you are not login</h1>
+    {% endif %}
+</div>
+
+<div> <!-- 显示当前post的评论信息 -->
+    {% for comment in comments %}
+        <li>---下边的是新发表的评论----
+            <p>author:{{comment.author.username}}</p>
+            <p>content:{{comment.body}}</p>
+        </li>
+        <!--<a href="/comments/post/{{post.id}}">permlink</a> &lt;!&ndash; 动态的固定地址 &ndash;&gt;-->
+        <!--&emsp;&emsp;&emsp;-->
+        <!--{% if post.author.id == request.session.user_id %}-->
+            <!--<a href="/comments/edit/{{post.id}}">edit</a> &lt;!&ndash; 编辑动态 &ndash;&gt;-->
+        <!--{% endif %}-->
+        <br/>
+    {% endfor %}
+</div>
+
 <div>
     <a href="/comments/index">回到首页</a>
 </div>

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from .forms import PostForm, LoginForm
-from .models import Post, User
+from .forms import PostForm, LoginForm,CommentForm
+from .models import Post, User,Comment
 from django.db import models
 
 
@@ -54,7 +54,16 @@ def index(request):
 # 为每一个post分配一个固定链接,也就是唯一的url引用
 def post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    return render(request, 'post.html', {'post': post})
+    if request.method=='POST':
+        form=CommentForm(request.POST)
+        if form.is_valid():
+            body=form.cleaned_data['body']
+            author=User.objects.get(id=request.session.get('user_id'))
+            post=Post.objects.get(id=post_id)
+            Comment.objects.create(body=body,author=author,post=post) #创建并保存
+            return redirect('/comments/post/'+str(post_id) )          #重定向到当前页面，防止刷新
+    comments=Comment.objects.filter(post__id=post_id).select_related()     #找到所有当前post下的评论
+    return render(request, 'post.html', {'post': post,'comments':comments,'post_id':post_id})
 
 
 # 访问 localhost:8000/comments/edit/1
