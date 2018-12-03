@@ -7,4 +7,6 @@ urlpatterns= [
     path('register/',views.register,name='register'),
     path('post/<int:post_id>', views.post, name='post'),
     path('edit/<int:post_id>',views.edit,name='edit'),
+    path('follow/<int:user_id>',views.follow),
+    path('get_friend_news',views.get_friend_news),
 ]
