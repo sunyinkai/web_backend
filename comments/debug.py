@@ -20,5 +20,5 @@
 # d["ABC"]=3
 # print(json.dumps(d))
 
-op=33
-print(33 is op)
+op="ABC"
+print('ABC' is op)

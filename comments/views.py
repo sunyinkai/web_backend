@@ -18,13 +18,13 @@ def login(request):
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
             action = form
-            print("action is", action)
             t = User.objects.filter(username=username)
             user = User(username=username)  # 如果用户名不存在,注册保存用户,否则就使用用户
             if len(t):
                 user = User.objects.get(username=username)
             else:
                 user.save()
+                return redirect('/comments/login/')  # 如果不加这一步，直接进行session的相关东西会出问题，user.id is None
             request.session['is_login'] = True
             request.session['user_id'] = user.id
             request.session['username'] = user.username
@@ -46,7 +46,7 @@ def index(request):
                 body = form.cleaned_data['body']
                 user_id = request.session.get('user_id')
                 username = request.session.get('username')
-                user = User(username=username, id=user_id)
+                user = User.objects.get(id=user_id)
                 post = Post(body=body, author=user)
                 post.save()  # 将表单中的数据提取出来,并且存储到数据库中
                 return redirect('/comments/index/')
@@ -135,10 +135,10 @@ def news_operate(request):
     content = 'this is new'
     news_id = 1
     # 上面的内容应该从表单中获取
-
+    current_user=request.session.get('user_id')
     if op is 'add':  # 如果为add,newsID为空,发布新动态
         body = content
-        user_id = request.session.get('user_id')
+        user_id = current_user
         username = request.session.get('username')
         user = User(username=username, id=user_id)
         post = Post(body=body, author=user)
@@ -146,11 +146,14 @@ def news_operate(request):
         return HttpResponse('add ok!')
     elif op is 'delete':
         post = Post.objects.get(id=news_id)
-        post.delete()
-        return HttpResponse("delete ok!")
+        if current_user is  post.author.id:
+            post.delete()
+            return HttpResponse("delete ok!")
+        else:
+            return HttpResponse('You have no access to delete news')
     elif op is 'update':
         post = get_object_or_404(Post, id=news_id)
-        if request.session.get('user_id') is post.author.id:  # 如果文章是当前用户的,可以对其修改
+        if current_user is post.author.id:  # 如果文章是当前用户的,可以对其修改
             post.body = content
             post.save()
             return HttpResponse('update ok!')
@@ -162,31 +165,46 @@ def news_operate(request):
 
 # post请求
 def comment_operate(request):
-    if request.session.get('is_login') is False:
+    if request.session.get('is_login') is False:  # 当前用户是否登录
         return redirect('/comments/login')
     # 下面的内容从post表单里获取
     op = 'add'
     content = 'new comment'
-    post_id = 3
+    news_id = 3
+    comment_id = 2
     # 上面的内容从post表单里获取
+    current_user = request.session.get('user_id')
     if op is 'add':
-        body=content
-        author = User.objects.get(id=request.session.get('user_id'))
-        post = Post.objects.get(id=post_id)
+        body = content
+        author = User.objects.get(id=current_user)
+        post = Post.objects.get(id=news_id)
         Comment.objects.create(body=body, author=author, post=post)  # 创建并保存
         return HttpResponse('comment add ok!')
     elif op is 'delete':
-        pass
+        comments = Comment.objects.filter(post__id=news_id).select_related()  # 将指定id号下的所有comment都找出来
+        for comment in comments:
+            if comment.id is comment_id:
+                if comment.author.id == current_user:
+                    comment.delete()
+                    return HttpResponse('comment delete ok!')
+                else:
+                    return HttpResponse('You have no access to delete!')
     elif op is 'update':
-        pass
+        comments = Comment.objects.filter(post__id=news_id).select_related()  # 将指定id号下的所有comment都找出来
+        for comment in comments:
+            if comment.id is comment_id:
+                if comment.author.id == current_user:
+                    comment.body = content
+                    comment.save()
+                    return HttpResponse('comment update ok!')
+                else:
+                    return HttpResponse('You have no access to update!')
     else:
         return HttpResponse('System Error!')
 
 
 def like_operate(request):
     pass
-
-
 
 
 def follow(request, user_id):
