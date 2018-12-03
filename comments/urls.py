@@ -8,5 +8,8 @@ urlpatterns= [
     path('post/<int:post_id>', views.post, name='post'),
     path('edit/<int:post_id>',views.edit,name='edit'),
     path('follow/<int:user_id>',views.follow),
-    path('get_friend_news',views.get_friend_news),
+    path('getFriendNews/',views.get_friend_news),
+    path('newsOperate/',views.news_operate),
+    path('commentOperate/',views.comment_operate),
+    path('likeOperate/',views.like_operate),
 ]

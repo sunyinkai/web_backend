@@ -150,7 +150,7 @@ host_obj.hostadmin_set.add(*admin_list)
 >>> for admin_line in admin_obj:
 ...     print admin_line.username
 
-----------------------------------------
+--------自己定义第三张表来查询--------------------
 class Host(models.Model):
     hostname = models.CharField(max_length=32)
     port = models.IntegerField()

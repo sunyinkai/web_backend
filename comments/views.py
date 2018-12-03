@@ -11,11 +11,14 @@ from django.db import models
 # 访问localhost:8000/comments/login
 def login(request):
     if request.method == 'POST':
+        print("post", request.POST)
         form = LoginForm(request.POST)
         # print(form.is_valid())
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
+            action = form
+            print("action is", action)
             t = User.objects.filter(username=username)
             user = User(username=username)  # 如果用户名不存在,注册保存用户,否则就使用用户
             if len(t):
@@ -23,7 +26,7 @@ def login(request):
             else:
                 user.save()
             request.session['is_login'] = True
-            request.session['user_id']  = user.id
+            request.session['user_id'] = user.id
             request.session['username'] = user.username
             return redirect('/comments/index/')  # 保存session后跳转到/comments/index/
     return render(request, 'login.html')
@@ -48,7 +51,7 @@ def index(request):
                 post.save()  # 将表单中的数据提取出来,并且存储到数据库中
                 return redirect('/comments/index/')
         posts = Post.objects.all()  # 注意:这里是显示所有的动态页面:
-        #return HttpResponse(to_json(posts),content_type='application/json')
+        # return HttpResponse(to_json(posts),content_type='application/json')
         return render(request, 'index.html', {'form': request.session.get('username'), 'posts': posts, })
 
 
@@ -84,47 +87,109 @@ def edit(request, post_id):
         return HttpResponse('Sorry,You have no the access to modify it!')
 
 
-
-
+# get请求
 def get_friend_news(request):
-    posts=Post.objects.all()
+    posts = Post.objects.all()
     # object_to_json
-    obj=[]
+    obj = []
     for post in posts:
-        #-union-
-        union={}
-        #--user--
-        user={}
-        user["userID"]=post.author.id
-        user["Nick"]=post.author.username
-        #--news--
-        news={}
-        news["content"]=post.body
-        news["NewsID"]=post.id
-        news["date"]="2018/06/23 14:57"
-        news["cntlike"]=0
-        news["liked"]=False
-        news_comment=[]
+        # -union-
+        union = {}
+        # --user--
+        user = {}
+        user["userID"] = post.author.id
+        user["Nick"] = post.author.username
+        # --news--
+        news = {}
+        news["content"] = post.body
+        news["NewsID"] = post.id
+        news["date"] = "2018/06/23 14:57"
+        news["cntlike"] = 0
+        news["liked"] = False
+        news_comment = []
         comments = Comment.objects.filter(post__id=post.id).select_related()  # 找到所有当前post下的评论
 
         for comment in comments:
-            d={}
-            d["userID"]=comment.author.id
-            d["Nick"]=comment.author.username
-            d["commentID"]=comment.id
-            d["content"]=comment.body
+            d = {}
+            d["userID"] = comment.author.id
+            d["Nick"] = comment.author.username
+            d["commentID"] = comment.id
+            d["content"] = comment.body
             news_comment.append(d)
-        news["comment"]=news_comment
+        news["comment"] = news_comment
 
-        union["user"]=user
-        union["News"]=news
+        union["user"] = user
+        union["News"] = news
         obj.append(union)
-    return JsonResponse(obj,safe=False)
-    #return HttpResponse(serializers.serialize('json',obj),content_type='application/json')
-    #return HttpResponse(to_json(posts),content_type='application/json')
+    return JsonResponse(obj, safe=False)
+    # return HttpResponse(serializers.serialize('json',obj),content_type='application/json')
+    # return HttpResponse(to_json(posts),content_type='application/json')
 
 
-def follow(request,user_id):
+# post 请求
+def news_operate(request):
+    if request.session.get('is_login') is False:  # 没有登录，返回到登录界面
+        return redirect('/comments/login/')
+    # 这里需要将表单里的内容提取出来
+    op = 'add'
+    content = 'this is new'
+    news_id = 1
+    # 上面的内容应该从表单中获取
+
+    if op is 'add':  # 如果为add,newsID为空,发布新动态
+        body = content
+        user_id = request.session.get('user_id')
+        username = request.session.get('username')
+        user = User(username=username, id=user_id)
+        post = Post(body=body, author=user)
+        post.save()  # 将表单中的数据提取出来,并且存储到数据库中
+        return HttpResponse('add ok!')
+    elif op is 'delete':
+        post = Post.objects.get(id=news_id)
+        post.delete()
+        return HttpResponse("delete ok!")
+    elif op is 'update':
+        post = get_object_or_404(Post, id=news_id)
+        if request.session.get('user_id') is post.author.id:  # 如果文章是当前用户的,可以对其修改
+            post.body = content
+            post.save()
+            return HttpResponse('update ok!')
+        else:  # 文章不属于当前用户,显示没有权限修改
+            return HttpResponse('Sorry,You have no the access to modify it!')
+    else:
+        return HttpResponse('System Error!')
+
+
+# post请求
+def comment_operate(request):
+    if request.session.get('is_login') is False:
+        return redirect('/comments/login')
+    # 下面的内容从post表单里获取
+    op = 'add'
+    content = 'new comment'
+    post_id = 3
+    # 上面的内容从post表单里获取
+    if op is 'add':
+        body=content
+        author = User.objects.get(id=request.session.get('user_id'))
+        post = Post.objects.get(id=post_id)
+        Comment.objects.create(body=body, author=author, post=post)  # 创建并保存
+        return HttpResponse('comment add ok!')
+    elif op is 'delete':
+        pass
+    elif op is 'update':
+        pass
+    else:
+        return HttpResponse('System Error!')
+
+
+def like_operate(request):
+    pass
+
+
+
+
+def follow(request, user_id):
     if not request.session.get("is_login"):
         return redirect("/comments/index/")
     return HttpResponse('you are now in follow')
