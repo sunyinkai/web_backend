@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>edit post:{{post.id}}</title>
+</head>
+<body>
+
+<div>  <!--cookie信息 -->
+    {% block content %}
+    <h2>your cookie</h2>
+    <p> {{ form }}</p>
+    <p> username:{{request.session.username}}</p>
+    <p> id:{{request.session.user_id}}</p>
+    <p>cookie: {{request.COOKIES}}</p>
+</div>
+
+<div> <!--　显示当前post -->
+        <li>-----下边的是当前post的内容-----
+            <p>author:{{post.author.username}}</p>
+            <p>content:{{post.body}}</p>
+        </li>
+        <br/>
+</div>
+<div> <!-- 一个能提交修改post的表单　-->
+    <h1>hello,what the new post is?</h1>
+    {% block mainbody %}
+    <form action="/News/edit/{{post.id}}" method="post">
+        {% csrf_token %}
+        content:<input type="text" style="width:700px;height:200px;" name="body"/> <br/>
+        <input type="submit" value="Submit"/>
+    </form>
+    {% endblock %}
+</div>
+
+{% endblock %}
+</body>
+</html>

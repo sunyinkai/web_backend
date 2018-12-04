@@ -19,5 +19,6 @@ from django.urls import path, include
 urlpatterns = [
     path('polls/', include('polls.urls')),
     path('comments/', include('comments.urls')),
+	path('News/',include('News.urls')),
     path('admin/', admin.site.urls),
 ]
