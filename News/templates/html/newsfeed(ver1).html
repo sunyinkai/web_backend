@@ -42,9 +42,9 @@
 			<a class="navbar-brand" href="index-register.html"><img src="images/logo.png" alt="logo" /></a>
 		  </div>
 
-		  <!-- Collect the nav links, forms, and other content for toggling-->
+		  <!-- Collect the nav links, forms, and other content for toggling -->
 		  <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-			<!-- <ul class="nav navbar-nav navbar-right main-menu">
+			<ul class="nav navbar-nav navbar-right main-menu">
 			  <li class="dropdown">
 				<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Home <span><img src="images/down-arrow.png" alt="" /></span></a>
 				<ul class="dropdown-menu newsfeed-home">
@@ -97,10 +97,7 @@
 				</ul>
 			  </li>
 			  <li class="dropdown"><a href="contact.html">Contact</a></li>
-			</ul> -->
-			<ul class="nav navbar-nav navbar-right main-menu">
-			<li class="dropdown">
-					<a href="#" class="dropdown-toggle pages" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">login <span></span></a></li></ul>
+			</ul>
 			<form class="navbar-form navbar-right hidden-sm">
 			  <div class="form-group">
 				<i class="icon ion-android-search"></i>
@@ -113,7 +110,7 @@
 	</header>
 	<!--Header End-->
 
-<!---->
+
 	  <div id="page-contents">
 		  <div class="container">
 			  <div class="row">
@@ -121,9 +118,9 @@
 				  <!-- Newsfeed Common Side Bar Left
 				================================================= -->
 				  <div class="col-md-3 static">
-					  <div class="profile-card" id='dvofdovmvf'>
-						  <img v-bind:src='"images/users/user-"+my.userID+".jpg"' alt="user" class="profile-photo" />
-						  <h5><a href="timeline.html" class="text-white">{{my.Nick}}</a></h5>
+					  <div class="profile-card">
+						  <img src="images/users/user-1.jpg" alt="user" class="profile-photo" />
+						  <h5><a href="timeline.html" class="text-white">Sarah Cruiz</a></h5>
 						  <a href="#" class="text-white"><i class="ion ion-android-person-add"></i> 1,299 followers</a>
 					  </div><!--profile card ends-->
 					  <ul class="nav-news-feed">
@@ -149,7 +146,7 @@
 						  </ul>
 					  </div><!--chat block ends-->
 				  </div>
-				  <div class="col-md-7">
+				  <div id="delewith" class="col-md-7">
 
 					  <!-- Post Create Box
 					================================================= -->
@@ -157,7 +154,7 @@
 						  <div  class="row">
 							  <div class="col-md-7 col-sm-7">
 								  <div class="form-group">
-									  <img v-bind:src='"images/users/user-"+my.userID+".jpg"'  alt="" class="profile-photo-md" />
+									  <img src="images/users/user-1.jpg" alt="" class="profile-photo-md" />
 									  <textarea name="texts" id="exampleTextarea" cols="30" rows="1" v-model:value="editNews"  class="form-control" placeholder="Write what you wish"></textarea>
 								  </div>
 							  </div>
@@ -167,7 +164,7 @@
 										  <li><a href="#"><i class="ion-compose"></i></a></li>
 										  <li><a href="#"><i class="ion-images"></i></a></li>
 									  </ul>
-									  <button class="btn btn-primary pull-right" v-on:click="add_news(editNews)">发布</button>
+									  <button class="btn btn-primary pull-right" v-on:click="add_news(editNews)">Publish</button>
 								  </div>
 							  </div>
 						  </div>
@@ -187,27 +184,29 @@
 									  <p class="text-muted">发布于{{item.News.date}}</p>
 								  </div>
 								  <div class="reaction">
-										<a v-bind:class="item.News.liked?'btn text-green':'btn text-blue'" v-on:click="like(item)"><i class="icon ion-thumbsup"></i> {{item.News.cntlike}}</a>
-										<template v-if="item.user.userID==myID">
-											<a v-on:click="del_news(index)"><span class="glyphicon glyphicon-trash btn text-blue"></span>   </a>
-										</template>
+									  <a v-bind:class="item.News.liked?'btn text-green':'btn text-blue'" v-on:click="like(item)"><i class="icon ion-thumbsup"></i> {{item.News.cntlike}}</a>
 								  </div>
 								  <div class="line-divider"></div>
 								  <div class="post-text">
 										<p>{{item.News.content}}</p>
-									
+										<template v-if="item.user.userID==myID">
+										<a v-on:click="del_news(index)">删除</a>
+										</template>
 								  </div>
 								  <div class="line-divider"></div>
 								  <div class="post-comment" v-for="(c_item,cindex) in item.News.comment">
 									  <img v-bind:src="'images/users/user-'+c_item.userID+'.jpg'" alt="" class="profile-photo-sm" />
 										<p><a href="timeline.html" class="profile-link">{{c_item.Nick}} </a> {{c_item.content}}</p>
-										
 										<template v-if="c_item.userID==myID">
-											<div style="right:0 ;    position: absolute;">
-											<a v-on:click="del_comment(item.News.comment,cindex)"><span class="glyphicon glyphicon-trash btn text-blue"></span>   </a></div>
+											<div style="width: 20px"></div>
+											<a v-on:click="del_comment(item.News.comment,cindex)">删除</a>
 										</template>
 								  </div>
-								  <comment_input v-bind:item='item'></comment_input>
+								  <div class="post-comment">
+									  <img v-bind:src="'images/users/user-'+item.user.userID+'.jpg'" alt="" class="profile-photo-sm" />
+										<input type="text"  v-model:value="comment" class="form-control" placeholder="Post a comment">
+									 <button class="btn btn-primary pull-right" v-on:click="add_comment(item,comment)">Publish</button>
+								  </div>
 							  </div>
 						  </div>
 					  </div>
@@ -264,7 +263,7 @@
 	  <footer id="footer">
 		  <div class="container">
 			  <div class="row">
-				  <!-- <div class="footer-wrapper">
+				  <div class="footer-wrapper">
 					  <div class="col-md-3 col-sm-3">
 						  <a href=""><img src="images/logo-black.png" alt="" class="footer-logo" /></a>
 						  <ul class="list-inline social-icons">
@@ -315,11 +314,11 @@
 							  <li><i class="icon ion-ios-location-outline"></i>228 Park Ave S NY, USA</li>
 						  </ul>
 					  </div>
-				  </div> -->
+				  </div>
 			  </div>
 		  </div>
 		  <div class="copyright">
-			  <p>Zydsgwan Team © 2018. All rights reserved</p>
+			  <p>Thunder Team © 2016. All rights reserved</p>
 		  </div>
 	  </footer>
 
@@ -336,7 +335,7 @@
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/jquery.sticky-kit.min.js"></script>
 	<script src="js/jquery.scrollbar.min.js"></script>
-	<script src="js/axios.min.js"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 	<script src="js/script.js"></script>
 	<script src="js/newsfeed.js"></script>
 

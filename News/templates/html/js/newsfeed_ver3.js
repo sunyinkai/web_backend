@@ -1,54 +1,23 @@
 var address='http://localhost:8000';
-var  my={
-    userID:11,
-    Nick:"zydoooog"
-};
-Vue.component('comment_input', {
-    props: ['item'],
-    data: function () {
-      return {
-        comment_content:'',
-        my:my
-      }
-    },
-    methods:{
-        add_comment(item ,content) {
-            url=address+'/News/commentOperate/'
-            var res={
-                userID:this.my.userID,
-                Nick:this.my.Nick,
-                commentID:0,
-                content:content
-            }
-            var postBody={
-                op:'add',
-                content:content,
-                newsID:item.News.newsID
-            };
-            axios
-            .post(url, JSON.stringify(postBody))
-              .then(function (response) {
-                console.log(response.data);
-                if(response.data.error==false){
-                    res.commentID=response.data.data.commentID;
-                    item.News.comment.push(res);
-                }
-            })
-            .catch(error => {
-                console.log(error)
-            })
-        }
-    },
-    template: '<div class="post-comment"><img v-bind:src="\'images/users/user-\'+my.userID+\'.jpg\'" alt="" class="profile-photo-sm" />      <input type="text"  v-model:value="comment_content" class="form-control" placeholder="Post a comment"><a><span class="btn text-blue 	glyphicon glyphicon-send" style=" margin-top:4px;" v-on:click="add_comment(item,comment_content)"></span></a></div>'
-  })
 
-//My.$mount(document.getElementsByClassName("create-post")[0]);
-
+function post_data(url ,postBody){
+    axios
+    .post(url, postBody)
+      .then(function (response) {
+        console.log(response);
+    })
+    .catch(error => {
+        console.log(error)
+    })
+}
 var News = new Vue({
-    el:"#page-contents",
+    el:"#delewith",
     data: {
         editNews:'',
-        my:my,
+        my:{
+            userID:11,
+            Nick:"zydoooog"
+        },
         myID:11,
         hostadd:address,
         items:[]
@@ -90,7 +59,32 @@ var News = new Vue({
                     this.errored = true
                 })
         },
-       
+        add_comment(item ,content) {
+            url=this.hostadd+'/News/commentOperate/'
+            var res={
+                userID:this.my.userID,
+                Nick:this.my.Nick,
+                commentID:0,
+                content:content
+            }
+            var postBody={
+                op:'add',
+                content:content,
+                newsID:item.News.newsID
+            };
+            axios
+            .post(url, JSON.stringify(postBody))
+              .then(function (response) {
+                console.log(response.data);
+                if(response.data.error==false){
+                    res.commentID=response.data.data.newsID;
+                    item.News.comment.push(res);
+                }
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        },
         del_comment(item ,index) {
             url=this.hostadd+"/News/commentOperate/";
             var postBody={

@@ -12,6 +12,7 @@ class User(models.Model):
 
 class Post(models.Model):
     id = models.AutoField(primary_key=True)
+    date=models.DateTimeField(auto_now=True)
     body = models.TextField()
     author = models.ForeignKey('User', on_delete=models.CASCADE)  # 默认关联到User的主键
 

@@ -5,6 +5,12 @@ from .forms import PostForm, LoginForm, CommentForm
 from .models import Post, User, Comment
 from django.db import models
 import json
+import datetime
+
+
+def timeconvert(o):
+    if isinstance(o, datetime.datetime):
+        return o.__str__()
 
 
 # Create your views here.
@@ -24,7 +30,7 @@ def get_friend_news(request):
         news = {}
         news["content"] = post.body
         news["newsID"] = post.id
-        news["date"] = "2018/06/23 14:57"
+        news["date"] = post.date
         news["cntlike"] = 0
         news["liked"] = False
         news_comment = []
@@ -44,7 +50,7 @@ def get_friend_news(request):
         obj.append(union)
     all_message['data'] = obj
     all_message['error'] = False
-    return HttpResponse(json.dumps(all_message),content_type='application/json')
+    return HttpResponse(json.dumps(all_message, default=timeconvert), content_type='application/json')
 
 
 # post request
@@ -71,13 +77,13 @@ def news_operate(request):
 
         # dump the data
         obj = {}
-        data={'newsID':post.id}
+        data = {'newsID': post.id}
         obj['data'] = data
         obj['error'] = False
         return HttpResponse(json.dumps(obj), content_type='application/json')
     elif op == 'delete':
         post = Post.objects.get(id=news_id)
-        if current_user is  post.author.id:
+        if current_user is post.author.id:
             post.delete()
             obj = {}
             data = {'newsID': news_id}
@@ -85,7 +91,7 @@ def news_operate(request):
             obj['error'] = False
             return HttpResponse(json.dumps(obj), content_type='application/json')
         else:
-            obj={}
+            obj = {}
             return HttpResponse('You have no access to delete news')
     elif op == 'update':
         pass
@@ -100,7 +106,7 @@ def news_operate(request):
         return HttpResponse('System Error!')
 
 
-# post请求
+# post request
 def comment_operate(request):
     # if request.session.get('is_login') is False:  # judge the user whether login
     user = User.objects.get(username='ubunt')
@@ -123,56 +129,37 @@ def comment_operate(request):
         post = Post.objects.get(id=news_id)
         comment = Comment(body=body, author=author, post=post)
         comment.save()
-        obj={"error":False}
-        data={"commentID":comment.id}
-        obj["data"]=data
-        return HttpResponse(json.dumps(obj),content_type="application/json")
+        obj = {"error": False}
+        data = {"commentID": comment.id}
+        obj["data"] = data
+        return HttpResponse(json.dumps(obj), content_type="application/json")
     elif op == 'delete':
+        comment = Comment.objects.get(id=comment_id)
+        if comment.author.id == current_user:
+            comment.delete()
+            obj = {"error": False}
+            data = {"commentID": comment.id}
+            obj["data"] = data
+            return HttpResponse(json.dumps(obj), content_type="application/json")
+        else:
+            return HttpResponse('You have no access to delete!')
+    elif op == 'update':
         pass
         # comments = Comment.objects.filter(post__id=news_id).select_related()  # 将指定id号下的所有comment都找出来
         # for comment in comments:
         #     if comment.id is comment_id:
         #         if comment.author.id == current_user:
-        #             comment.delete()
-        #             return HttpResponse('comment delete ok!')
+        #             comment.body = content
+        #             comment.save()
+        #             return HttpResponse('comment update ok!')
         #         else:
-        #             return HttpResponse('You have no access to delete!')
-    elif op is 'update':
-        comments = Comment.objects.filter(post__id=news_id).select_related()  # 将指定id号下的所有comment都找出来
-        for comment in comments:
-            if comment.id is comment_id:
-                if comment.author.id == current_user:
-                    comment.body = content
-                    comment.save()
-                    return HttpResponse('comment update ok!')
-                else:
-                    return HttpResponse('You have no access to update!')
+        #             return HttpResponse('You have no access to update!')
     else:
         return HttpResponse('System Error!')
 
 
 def like_operate(request):
     pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def follow(request, user_id):
