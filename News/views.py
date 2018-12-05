@@ -6,7 +6,195 @@ from .models import Post, User, Comment
 from django.db import models
 import json
 
+
 # Create your views here.
+# get request
+def get_friend_news(request):
+    posts = Post.objects.all()
+    all_message = {}
+    obj = []
+    for post in posts:
+        # -union-
+        union = {}
+        # --user--
+        user = {}
+        user["userID"] = post.author.id
+        user["Nick"] = post.author.username
+        # --news--
+        news = {}
+        news["content"] = post.body
+        news["newsID"] = post.id
+        news["date"] = "2018/06/23 14:57"
+        news["cntlike"] = 0
+        news["liked"] = False
+        news_comment = []
+        comments = Comment.objects.filter(post__id=post.id).select_related()  # 找到所有当前post下的评论
+
+        for comment in comments:
+            d = {}
+            d["userID"] = comment.author.id
+            d["Nick"] = comment.author.username
+            d["commentID"] = comment.id
+            d["content"] = comment.body
+            news_comment.append(d)
+        news["comment"] = news_comment
+
+        union["News"] = news
+        union["user"] = user
+        obj.append(union)
+    all_message['data'] = obj
+    all_message['error'] = False
+    return HttpResponse(json.dumps(all_message),content_type='application/json')
+
+
+# post request
+def news_operate(request):
+    if request.session.get('is_login') is not True:  # not login,redirect to the index
+        user = User.objects.get(username='ubunt')
+        request.session['is_login'] = True
+        request.session['user_id'] = user.id
+        request.session['username'] = user.username
+        # return redirect('/News/login/')
+
+    result = json.loads(request.body.decode())
+    content = result.get('content')
+    op = result.get('op')
+    news_id = result.get('newsID')
+    current_user = request.session.get('user_id')
+    if op == 'add':
+        body = content
+        user_id = current_user
+        username = request.session.get('username')
+        user = User(username=username, id=user_id)
+        post = Post(body=body, author=user)
+        post.save()
+
+        # dump the data
+        obj = {}
+        data={'newsID':post.id}
+        obj['data'] = data
+        obj['error'] = False
+        return HttpResponse(json.dumps(obj), content_type='application/json')
+    elif op == 'delete':
+        post = Post.objects.get(id=news_id)
+        if current_user is  post.author.id:
+            post.delete()
+            obj = {}
+            data = {'newsID': news_id}
+            obj['data'] = data
+            obj['error'] = False
+            return HttpResponse(json.dumps(obj), content_type='application/json')
+        else:
+            obj={}
+            return HttpResponse('You have no access to delete news')
+    elif op == 'update':
+        pass
+        # post = get_object_or_404(Post, id=news_id)
+        # if current_user is post.author.id:  # 如果文章是当前用户的,可以对其修改
+        #     post.body = content
+        #     post.save()
+        #     return HttpResponse('update ok!')
+        # else:  # 文章不属于当前用户,显示没有权限修改
+        #     return HttpResponse('Sorry,You have no the access to modify it!')
+    else:
+        return HttpResponse('System Error!')
+
+
+# post请求
+def comment_operate(request):
+    # if request.session.get('is_login') is False:  # judge the user whether login
+    user = User.objects.get(username='ubunt')
+    request.session['is_login'] = True
+    request.session['user_id'] = user.id
+    request.session['username'] = user.username
+    # return redirect('/News/login')
+
+    # load the data from post form
+    result = json.loads(request.body.decode())
+    op = result.get('op')
+    content = result.get('content')
+    news_id = result.get('newsID')
+    comment_id = result.get('commentID')
+
+    current_user = request.session.get('user_id')
+    if op == 'add':
+        body = content
+        author = User.objects.get(id=current_user)
+        post = Post.objects.get(id=news_id)
+        comment = Comment(body=body, author=author, post=post)
+        comment.save()
+        obj={"error":False}
+        data={"commentID":comment.id}
+        obj["data"]=data
+        return HttpResponse(json.dumps(obj),content_type="application/json")
+    elif op == 'delete':
+        pass
+        # comments = Comment.objects.filter(post__id=news_id).select_related()  # 将指定id号下的所有comment都找出来
+        # for comment in comments:
+        #     if comment.id is comment_id:
+        #         if comment.author.id == current_user:
+        #             comment.delete()
+        #             return HttpResponse('comment delete ok!')
+        #         else:
+        #             return HttpResponse('You have no access to delete!')
+    elif op is 'update':
+        comments = Comment.objects.filter(post__id=news_id).select_related()  # 将指定id号下的所有comment都找出来
+        for comment in comments:
+            if comment.id is comment_id:
+                if comment.author.id == current_user:
+                    comment.body = content
+                    comment.save()
+                    return HttpResponse('comment update ok!')
+                else:
+                    return HttpResponse('You have no access to update!')
+    else:
+        return HttpResponse('System Error!')
+
+
+def like_operate(request):
+    pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def follow(request, user_id):
+    if not request.session.get("is_login"):
+        return redirect("/News/index/")
+    return HttpResponse('you are now in follow')
+
+
+def register(request):
+    return render(request, 'register.html')
+
+
+def logout(request):
+    session_keys = list(request.session.keys())
+    for key in session_keys:
+        del request.session[key]
+    return redirect("/News/login/")
+
+
+def to_json(obj):
+    return serializers.serialize('json', obj)
+
 
 # 访问localhost:8000/comments/login
 def login(request):
@@ -85,174 +273,3 @@ def edit(request, post_id):
         return render(request, 'edit_post.html', {'post': post})
     else:  # 文章不属于当前用户,显示没有权限修改
         return HttpResponse('Sorry,You have no the access to modify it!')
-
-
-# get请求
-def get_friend_news(request):
-    posts = Post.objects.all()
-    # object_to_json
-    all_message={}
-    obj = []
-    for post in posts:
-        # -union-
-        union = {}
-        # --user--
-        user = {}
-        user["userID"] = post.author.id
-        user["Nick"] = post.author.username
-        # --news--
-        news = {}
-        news["content"] = post.body
-        news["newsID"] = post.id
-        news["date"] = "2018/06/23 14:57"
-        news["cntlike"] = 0
-        news["liked"] = False
-        news_comment = []
-        comments = Comment.objects.filter(post__id=post.id).select_related()  # 找到所有当前post下的评论
-
-        for comment in comments:
-            d = {}
-            d["userID"] = comment.author.id
-            d["Nick"] = comment.author.username
-            d["commentID"] = comment.id
-            d["content"] = comment.body
-            news_comment.append(d)
-        news["comment"] = news_comment
-
-        union["News"] = news
-        union["user"] = user
-        obj.append(union)
-    all_message['data']=obj
-    all_message['error']=False
-    response=HttpResponse()
-    response['Access-Control-Allow-Origin'] = 'http://localhost:8000/*'
-    response['Content-type']='application/json'
-    response.write(json.dumps(all_message))
-    return response
-    #return HttpResponse(json.dumps(all_message),content_type='application/json')
-    #return JsonResponse(obj, safe=False)
-    #return HttpResponse(serializers.serialize('json',obj),content_type='application/json')
-    # return HttpResponse(to_json(posts),content_type='application/json')
-
-
-# post 请求
-def news_operate(request):
-    print('---in news operate---')
-    if request.session.get('is_login') is not True:  # 没有登录，返回到登录界面
-        #get_tmp_session()
-        user = User.objects.get(username='ubunt')
-        request.session['is_login'] = True
-        request.session['user_id'] = user.id
-        request.session['username'] = user.username
-
-        #return redirect('/News/login/')
-    # 这里需要将表单里的内容提取出来
-    result=json.loads(request.body.decode())
-    content=result.get('content')
-    op=result.get('op')
-    news_id=result.get('news_id')
-    print("----",content,op,news_id,"-------")  #debug information
-    # 上面的内容应该从表单中获取
-    # print(op is 'add')
-    # print(op == 'add')
-    current_user=request.session.get('user_id')
-    if op == 'add':  # 如果为add,newsID为空,发布新动态
-        body = content
-        user_id = current_user
-        username = request.session.get('username')
-        user = User(username=username, id=user_id)
-
-        post = Post(body=body, author=user)
-        #Post.objects.create(body=body, author=user)
-        post.save()  # 将表单中的数据提取出来,并且存储到数据库中
-
-        print(post.body)
-        print(post.author)
-        print(json.dumps(post.id))
-        print(post.id)
-        return HttpResponse(json.dumps(post.id),content_type='application/json')
-        # return HttpResponse('add ok!')
-    elif op is 'delete':
-        pass
-        # post = Post.objects.get(id=news_id)
-        # if current_user is  post.author.id:
-        #     post.delete()
-        #     return HttpResponse("delete ok!")
-        # else:
-        #     return HttpResponse('You have no access to delete news')
-    elif op is 'update':
-        pass
-        # post = get_object_or_404(Post, id=news_id)
-        # if current_user is post.author.id:  # 如果文章是当前用户的,可以对其修改
-        #     post.body = content
-        #     post.save()
-        #     return HttpResponse('update ok!')
-        # else:  # 文章不属于当前用户,显示没有权限修改
-        #     return HttpResponse('Sorry,You have no the access to modify it!')
-    else:
-        return HttpResponse('System Error!')
-
-
-# post请求
-def comment_operate(request):
-    if request.session.get('is_login') is False:  # 当前用户是否登录
-        return redirect('/News/login')
-    # 下面的内容从post表单里获取
-    op = 'add'
-    content = 'new comment'
-    news_id = 3
-    comment_id = 2
-    # 上面的内容从post表单里获取
-    current_user = request.session.get('user_id')
-    if op is 'add':
-        body = content
-        author = User.objects.get(id=current_user)
-        post = Post.objects.get(id=news_id)
-        Comment.objects.create(body=body, author=author, post=post)  # 创建并保存
-        return HttpResponse('comment add ok!')
-    elif op is 'delete':
-        comments = Comment.objects.filter(post__id=news_id).select_related()  # 将指定id号下的所有comment都找出来
-        for comment in comments:
-            if comment.id is comment_id:
-                if comment.author.id == current_user:
-                    comment.delete()
-                    return HttpResponse('comment delete ok!')
-                else:
-                    return HttpResponse('You have no access to delete!')
-    elif op is 'update':
-        comments = Comment.objects.filter(post__id=news_id).select_related()  # 将指定id号下的所有comment都找出来
-        for comment in comments:
-            if comment.id is comment_id:
-                if comment.author.id == current_user:
-                    comment.body = content
-                    comment.save()
-                    return HttpResponse('comment update ok!')
-                else:
-                    return HttpResponse('You have no access to update!')
-    else:
-        return HttpResponse('System Error!')
-
-
-def like_operate(request):
-    pass
-
-
-def follow(request, user_id):
-    if not request.session.get("is_login"):
-        return redirect("/News/index/")
-    return HttpResponse('you are now in follow')
-
-
-def register(request):
-    return render(request, 'register.html')
-
-
-def logout(request):
-    session_keys = list(request.session.keys())
-    for key in session_keys:
-        del request.session[key]
-    return redirect("/News/login/")
-
-
-def to_json(obj):
-    return serializers.serialize('json', obj)

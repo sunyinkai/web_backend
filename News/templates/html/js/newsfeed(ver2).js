@@ -40,14 +40,16 @@ var News = new Vue({
             .finally(() => this.loading = false);
     },
     methods:{
+        
         like(item) {
-            var url=this.hostadd+'/News/likeOperate/';
-            var PostData={
-                newsID:item.News.newsID,
-                op:item.News.liked?'add':'delete'
+            if(!item.News.liked){
+                var url=this.hostadd+'/News/add_like/'+item.News.newsID;
+            }
+            else{
+                var url=this.hostadd+'/News/del_like/'+item.News.newsID;
             }
             axios
-                .post(url,JSON.stringify(PostData))
+                .get(url,{withCredentials:true})
                 .then(response => {
                     if(response.data.error==false){
                         item.News.cntlike+=item.News.liked?-1:1;
