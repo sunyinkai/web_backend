@@ -91,6 +91,7 @@ def edit(request, post_id):
 def get_friend_news(request):
     posts = Post.objects.all()
     # object_to_json
+    all_message={}
     obj = []
     for post in posts:
         # -union-
@@ -121,7 +122,14 @@ def get_friend_news(request):
         union["News"] = news
         union["user"] = user
         obj.append(union)
-    return HttpResponse(json.dumps(obj),content_type='application/json')
+    all_message['data']=obj
+    all_message['error']=False
+    response=HttpResponse()
+    response['Access-Control-Allow-Origin'] = 'http://localhost:8000/*'
+    response['Content-type']='application/json'
+    response.write(json.dumps(all_message))
+    return response
+    #return HttpResponse(json.dumps(all_message),content_type='application/json')
     #return JsonResponse(obj, safe=False)
     #return HttpResponse(serializers.serialize('json',obj),content_type='application/json')
     # return HttpResponse(to_json(posts),content_type='application/json')
@@ -139,38 +147,45 @@ def news_operate(request):
 
         #return redirect('/News/login/')
     # 这里需要将表单里的内容提取出来
-    print('---in news operate---')
-    print('islogin',request.session.get('is_login'))
-    print('username',request.session.get('username'))
-    op = 'add'
-    content = 'this is new'
-    news_id = 1
+    result=json.loads(request.body.decode())
+    content=result.get('content')
+    op=result.get('op')
+    news_id=result.get('news_id')
+    print(content,op,news_id)  #debug information
     # 上面的内容应该从表单中获取
+    # print(op is 'add')
+    # print(op == 'add')
     current_user=request.session.get('user_id')
-    if op is 'add':  # 如果为add,newsID为空,发布新动态
-        pass
-        # body = content
-        # user_id = current_user
-        # username = request.session.get('username')
-        # user = User(username=username, id=user_id)
-        # post = Post(body=body, author=user)
-        # post.save()  # 将表单中的数据提取出来,并且存储到数据库中
+    if op == 'add':  # 如果为add,newsID为空,发布新动态
+        body = content
+        user_id = current_user
+        username = request.session.get('username')
+        user = User(username=username, id=user_id)
+
+        post = Post(body=body, author=user)
+        #Post.objects.create(body=body, author=user)
+        post.save()  # 将表单中的数据提取出来,并且存储到数据库中
+        print(json.dumps(post.id))
+        print(post.id)
+        return HttpResponse(json.dumps(post.id),content_type='application/json')
         # return HttpResponse('add ok!')
     elif op is 'delete':
-        post = Post.objects.get(id=news_id)
-        if current_user is  post.author.id:
-            post.delete()
-            return HttpResponse("delete ok!")
-        else:
-            return HttpResponse('You have no access to delete news')
+        pass
+        # post = Post.objects.get(id=news_id)
+        # if current_user is  post.author.id:
+        #     post.delete()
+        #     return HttpResponse("delete ok!")
+        # else:
+        #     return HttpResponse('You have no access to delete news')
     elif op is 'update':
-        post = get_object_or_404(Post, id=news_id)
-        if current_user is post.author.id:  # 如果文章是当前用户的,可以对其修改
-            post.body = content
-            post.save()
-            return HttpResponse('update ok!')
-        else:  # 文章不属于当前用户,显示没有权限修改
-            return HttpResponse('Sorry,You have no the access to modify it!')
+        pass
+        # post = get_object_or_404(Post, id=news_id)
+        # if current_user is post.author.id:  # 如果文章是当前用户的,可以对其修改
+        #     post.body = content
+        #     post.save()
+        #     return HttpResponse('update ok!')
+        # else:  # 文章不属于当前用户,显示没有权限修改
+        #     return HttpResponse('Sorry,You have no the access to modify it!')
     else:
         return HttpResponse('System Error!')
 

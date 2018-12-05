@@ -20,7 +20,7 @@ var News = new Vue({
         },
         myID:11,
         hostadd:address,
-        items:[{"user":{"userID":11,"Nick":"zydooosg"},"News":{"content":"xxx","newsID":156,"date":"xxxx/xx/xx xx:xx","cntlike":0,"liked":false,"comment":[{"userID":1,"Nick":"xxxX","commentID":1234,"content":"xxxdd"},{"userID":11,"Nick":"yyyx","commentID":12234,"content":"xxxzxczczxdd"}]}}]
+        items:[]
     },
     mounted(){
         console.log(this.myID);
@@ -28,8 +28,10 @@ var News = new Vue({
         axios
             .get(url,{withCredentials:true})
             .then(response => {
-                this.items = response.data;
-                        console.log(this.items)
+                console.log(response.data);
+                if(response.data.error==false){
+                    News.items = response.data.data;
+                }
             })
             .catch(error => {
                 console.log(error)
@@ -40,7 +42,6 @@ var News = new Vue({
     methods:{
         
         like(item) {
-            console.log(item);
             if(!item.News.liked){
                 var url=this.hostadd+'/News/add_like/'+item.News.newsID;
             }
@@ -62,7 +63,6 @@ var News = new Vue({
         },
         add_comment(item ,content) {
             url=this.hostadd+'/News/commentOperate/'
-            console.log(item)
             var res={
                 userID:this.my.userID,
                 Nick:this.my.Nick,
@@ -77,7 +77,7 @@ var News = new Vue({
             axios
             .post(url, JSON.stringify(postBody))
               .then(function (response) {
-                console.log(response);
+                console.log(response.data);
                 if(response.data.error==false){
                     res.commentID=response.data.data.newsID;
                     item.News.comment.push(res);
@@ -88,8 +88,6 @@ var News = new Vue({
             })
         },
         del_comment(item ,index) {
-            console.log(item)
-
             url=this.hostadd+"/News/commentOperate/";
             var postBody={
                 op:'delete',
@@ -98,7 +96,7 @@ var News = new Vue({
             axios
             .post(url, JSON.stringify(postBody))
             .then(function (response) {
-                console.log(response);
+                console.log(response.data);
                 if(response.data.error==false){
                     item.splice(index,1);
                 }
@@ -108,7 +106,6 @@ var News = new Vue({
             })
         },
         add_news(content){
-            console.log(content)
             var res={
             user:{
                 userID:this.my.userID,
@@ -132,7 +129,7 @@ var News = new Vue({
             axios
             .post(url, JSON.stringify(postBody))
             .then(function (response) {
-                console.log(response);
+                console.log(response.data);
                 if(response.data.error==false){
                     res.News.newsID=response.data.data.newsID;
                     News.items.push(res);
@@ -155,7 +152,7 @@ var News = new Vue({
             axios
             .post(url, JSON.stringify(postBody))
             .then(function (response) {
-                console.log(response);
+                console.log(response.data);
                 if(response.data.error==false){
                     News.items.splice(index,1);
                 }
