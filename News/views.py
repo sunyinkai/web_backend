@@ -151,7 +151,7 @@ def news_operate(request):
     content=result.get('content')
     op=result.get('op')
     news_id=result.get('news_id')
-    print(content,op,news_id)  #debug information
+    print("----",content,op,news_id,"-------")  #debug information
     # 上面的内容应该从表单中获取
     # print(op is 'add')
     # print(op == 'add')
@@ -165,6 +165,9 @@ def news_operate(request):
         post = Post(body=body, author=user)
         #Post.objects.create(body=body, author=user)
         post.save()  # 将表单中的数据提取出来,并且存储到数据库中
+
+        print(post.body)
+        print(post.author)
         print(json.dumps(post.id))
         print(post.id)
         return HttpResponse(json.dumps(post.id),content_type='application/json')

@@ -11,7 +11,6 @@ from django.db import models
 # 访问localhost:8000/comments/login
 def login(request):
     if request.method == 'POST':
-        print("post", request.POST)
         form = LoginForm(request.POST)
         # print(form.is_valid())
         if form.is_valid():
@@ -24,10 +23,13 @@ def login(request):
                 user = User.objects.get(username=username)
             else:
                 user.save()
-                return redirect('/comments/login/')  # 如果不加这一步，直接进行session的相关东西会出问题，user.id is None
+                print('user.id = %d',user.id)
+                print('user.username=%s',user.username)
+                #return redirect('/comments/login/')  # 如果不加这一步，直接进行session的相关东西会出问题，user.id is None
             request.session['is_login'] = True
             request.session['user_id'] = user.id
             request.session['username'] = user.username
+            print('-------------in login------------------')
             return redirect('/comments/index/')  # 保存session后跳转到/comments/index/
     return render(request, 'login.html')
 
