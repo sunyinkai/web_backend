@@ -3,6 +3,7 @@ var  my={
     userID:11,
     Nick:"zydoooog"
 };
+
 Vue.component('comment_input', {
     props: ['item'],
     data: function () {

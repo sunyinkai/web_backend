@@ -16,7 +16,7 @@ def timeconvert(o):
 # Create your views here.
 # get request
 def get_friend_news(request):
-    posts = Post.objects.all()
+    posts = Post.objects.order_by("-date").all()
     all_message = {}
     obj = []
     for post in posts:
